@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import { promisify } from 'util';
 import path from 'path';
 import set from 'lodash.set';
+import { PackageJson } from 'type-fest';
 
 const stat = promisify(fs.stat);
 
@@ -11,17 +12,21 @@ const readFile = promisify(fs.readFile);
 type PackageJsonLoaderOptions = {
   target?: string;
   packageJsonPath?: string;
+  map?: (packageJson: PackageJson) => any;
 };
 
 export default function packageJsonLoader(options?: PackageJsonLoaderOptions): Loader {
-  const sourcePath = options?.packageJsonPath || path.join(process.cwd(), 'package.json');
+  const sourcePath = options?.packageJsonPath ?? path.join(process.cwd(), 'package.json');
+  const mapFn = options?.map ?? (v => v);
   if (!fs.existsSync(sourcePath)) throw new Error(`${sourcePath} 404`);
   return async function packageJsonFileLoader() {
     try {
       const fstat = await stat(sourcePath);
       if (fstat.isFile()) {
-        const packageJson = await readFile(sourcePath, { encoding: 'utf8' });
-        return options?.target ? set({}, options.target, JSON.parse(packageJson)) : JSON.parse(packageJson);
+        const packageJsonSting = await readFile(sourcePath, { encoding: 'utf8' });
+        const mappedPackageJson = mapFn(JSON.parse(packageJsonSting));
+
+        return options?.target ? set({}, options.target, mappedPackageJson) : mappedPackageJson;
       }
       throw new Error(`Source ${sourcePath} is not a file`);
     } catch (err) {

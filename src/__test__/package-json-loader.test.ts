@@ -1,5 +1,4 @@
 import packgeJsonLoader from '../package-json-loader';
-import * as fs from 'fs';
 import path from 'path';
 import { PackageJson } from 'type-fest';
 describe('Ghii Yaml Loader', () => {
@@ -9,8 +8,8 @@ describe('Ghii Yaml Loader', () => {
 
   describe('to create a loader', () => {
     it('create a file loader from yaml file', async () => {
-      const yamlFileLoader = packgeJsonLoader();
-      expect(typeof yamlFileLoader).toBe('function');
+      const packageJsonLoader = packgeJsonLoader();
+      expect(typeof packageJsonLoader).toBe('function');
     });
     it('a package.json that not exist ', async () => {
       expect(() => {
@@ -36,9 +35,21 @@ describe('Ghii Yaml Loader', () => {
       const content = (await packgeJsonLoader({ target: 'app' })()) as { app: PackageJson };
       expect(content.app.name).toBe('@ghii/package-json-loader');
     });
-    it('read to app name from package json', async () => {
+    it('read to app name from package json on default path', async () => {
       const content = (await packgeJsonLoader()()) as PackageJson;
       expect(content.name).toBe('@ghii/package-json-loader');
+    });
+    it('read and map to scalar', async () => {
+      const content = await packgeJsonLoader({ map: p => p.name })();
+      expect(content).toBe('@ghii/package-json-loader');
+    });
+    it('read and map to object', async () => {
+      const content = await packgeJsonLoader({
+        map: p => ({
+          packageName: p.name,
+        }),
+      })();
+      expect(content.packageName).toBe('@ghii/package-json-loader');
     });
   });
 });
