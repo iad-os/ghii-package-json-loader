@@ -1,9 +1,9 @@
 import { Loader } from '@ghii/ghii';
 import * as fs from 'fs';
-import { promisify } from 'util';
-import path from 'path';
 import set from 'lodash.set';
+import path from 'path';
 import { PackageJson } from 'type-fest';
+import { promisify } from 'util';
 
 const stat = promisify(fs.stat);
 
@@ -30,7 +30,9 @@ export default function packageJsonLoader(options?: PackageJsonLoaderOptions): L
       }
       throw new Error(`Source ${sourcePath} is not a file`);
     } catch (err) {
-      throw new Error(`${sourcePath} --> ${err.message} `);
+      if (err instanceof Error) {
+        throw new Error(`${sourcePath} --> ${err.message} `);
+      }
     }
   };
 }
