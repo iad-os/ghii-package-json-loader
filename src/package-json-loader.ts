@@ -1,8 +1,8 @@
-import { Loader } from '@ghii/ghii';
+import type { Loader } from '@ghii/ghii';
 import * as fs from 'fs';
 import set from 'lodash.set';
 import path from 'path';
-import { PackageJson } from 'type-fest';
+import type { PackageJson } from 'type-fest';
 import { promisify } from 'util';
 
 const stat = promisify(fs.stat);
@@ -36,3 +36,5 @@ export default function packageJsonLoader(options?: PackageJsonLoaderOptions): L
     }
   };
 }
+
+export { packageJsonLoader };
